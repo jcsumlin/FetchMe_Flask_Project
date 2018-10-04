@@ -1,6 +1,8 @@
-from flask import Flask, render_template,flash,redirect,url_for
+from flask import Flask, render_template, flash, redirect, url_for
 from flask_bcrypt import Bcrypt
+
 from forms import LoginForm
+
 # from flaskblog.forms import RegistrationForm, LoginForm
 
 app = Flask(__name__)
@@ -18,8 +20,11 @@ def hello_world():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        flash(f"You have been logged in! {form.username.data}", category="success")
-        return redirect(url_for('dashboard'))
+        if form.username.data == "admin@mail.com" and form.password.data == "password":
+            flash(f"You have been logged in! {form.username.data}", category="success")
+            return redirect(url_for('dashboard'))
+        else:
+            flash("Your username and password did not match!", category='danger')
     return render_template('login.html', name="Login Page {0}".format(site_title), form=form)
 
 @app.route('/dashboard')
