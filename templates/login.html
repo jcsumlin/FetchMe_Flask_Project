@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>Login Page</h1>
+    <link rel="stylesheet" type="text/css" href="css/login.css">
+    <h1>Employee Bonus Points<br /></h1>
+    <h2>Login</h2>
     <div class="">
         <form method="post" action="">
             {{ form.hidden_tag() }}
@@ -19,5 +21,14 @@
                 {{ form.submit(class="btn btn-outline-info") }}
             </div>
         </form>
+        <!-- Side navigation -->
+        <div class="sidenav">
+          <img src="https://media.licdn.com/dms/image/C4E0BAQEff2J2QldzVQ/company-logo_200_200/0?e=2159024400&v=beta&t=AWXTo4w74-pfIduiFpMxWoENJGPMQqvfS9dH43gEshA" alt="HTML5 Icon" style="width:160px;height:128px;">
+        </div>
+
+        <!-- Page content -->
+        <div class="main">
+
+        </div>
     </div>
 {% endblock content %}
