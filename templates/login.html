@@ -1,9 +1,13 @@
 {% extends "layout.html" %}
 {% block content %}
-    <link rel="stylesheet" type="text/css" href="css/login.css">
-    <h1>Employee Bonus Points<br /></h1>
-    <h2>Login</h2>
-    <div class="">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/login.css') }}">
+    <!-- Side navigation -->
+    <div class="sidenav">
+        <img src="https://www.fetchmedelivery.com/editable/templates/default/images/logo.png" alt="FetchMe Logo"
+             style="width:230px; margin: 10px 10px 0 10px;" class="img-responsive">
+    </div>
+    <div class="page-content">
+        <h1>Employee Bonus Points</h1>
         <form method="post" action="">
             <div class="container">
             {{ form.hidden_tag() }}
@@ -23,14 +27,5 @@
             </div>
             </div>
         </form>
-        <!-- Side navigation -->
-        <div class="sidenav">
-          <img src="https://media.licdn.com/dms/image/C4E0BAQEff2J2QldzVQ/company-logo_200_200/0?e=2159024400&v=beta&t=AWXTo4w74-pfIduiFpMxWoENJGPMQqvfS9dH43gEshA" alt="HTML5 Icon" style="width:160px;height:128px;">
-        </div>
-
-        <!-- Page content -->
-        <div class="main">
-
-        </div>
     </div>
 {% endblock content %}
