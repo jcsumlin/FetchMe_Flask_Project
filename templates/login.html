@@ -1,8 +1,15 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>Login Page</h1>
-    <div class="">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/login.css') }}">
+    <!-- Side navigation -->
+    <div class="sidenav">
+        <img src="https://www.fetchmedelivery.com/editable/templates/default/images/logo.png" alt="FetchMe Logo"
+             style="width:230px; margin: 10px 10px 0 10px;" class="img-responsive">
+    </div>
+    <div class="page-content">
+        <h1>Employee Bonus Points</h1>
         <form method="post" action="">
+            <div class="container">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
                 <legend class="">Login</legend>
@@ -17,6 +24,7 @@
             </fieldset>
             <div class="form-group">
                 {{ form.submit(class="btn btn-outline-info") }}
+            </div>
             </div>
         </form>
     </div>
