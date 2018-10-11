@@ -1,0 +1,57 @@
+.sidenav {
+    background: #03244d;
+    font-size: medium;
+    height: 100%;
+    width: 250px;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    overflow-x: hidden;
+    padding-top: 20px;
+}
+
+.sidenav a {
+    padding: 6px 8px 6px 16px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+}
+.logo {
+    width: 230px;
+    align-self:center;
+}
+
+.row {
+    height: 100%;
+    margin-left: 250px;
+
+}
+
+.well {
+    width: calc(33% - 30px);
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.block {
+    width: calc(33% - 15px);
+    margin-right: 15px;
+    background: #FFFFFF;
+    box-shadow: 5px 10px 18px #888888;
+    height: 125px;
+    float: left;
+}
+
+.block h1 {
+    text-align: center;
+    padding-top: 5px;
+}
+
+.block h3 {
+    text-align: center;
+    bottom: 0;
+    margin-bottom: 5px;
+    position: relative;
+}
