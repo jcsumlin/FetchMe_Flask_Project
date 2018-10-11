@@ -1,0 +1,59 @@
+{% extends "layout.html"  %}
+{% block content %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/dashboard.css') }}">
+    <div class="row">
+        <div class="col-xs-3 sidenav">
+            <img src="https://www.fetchmedelivery.com/editable/templates/default/images/logo.png"
+            style="width:230px;" class="logo">
+            <br>
+            <a href="#"><i class="fa fa-home"></i>Dashboard</a>
+            <a href="#"><i class="fa fa-home"></i>Dashboard</a>
+            <a href="#"><i class="fa fa-home"></i>Dashboard</a>
+            <a href="#"><i class="fa fa-home"></i>Dashboard</a>
+
+        </div>
+        <div class="col-xs-9">
+            <h1>Dashboard</h1>
+            <a href="/logout">
+                <button class="button button-danger">Logout</button>
+            </a>
+            <br>
+            <div class="col-xs-1"></div>
+            <div class="col-xs-10">
+                <div class="block">
+                    <h1>
+                        {% if data_1 %}
+                            {{ data_1 }}
+                        {% else %}
+                            Error
+                        {% endif %}
+
+                    </h1>
+                </div>
+                <div class="block">
+                    <h1>
+                        {% if data_2 %}
+                            {{ data_2 }}
+                        {% else %}
+                            Error
+                        {% endif %}
+
+                    </h1>
+                </div>
+                <div class="block">
+                    <h1>
+                        {% if data_3 %}
+                            {{ data_3 }}
+                        {% else %}
+                            Error
+                        {% endif %}
+                    </h1>
+                <h3>Points Pending</h3>
+                </div>
+            </div>
+            <div class="col-xs-1"></div>
+
+        </div>
+    </div>
+
+{% endblock %}

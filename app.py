@@ -25,7 +25,7 @@ def get_user(username):
                                  cursorclass=pymysql.cursors.DictCursor)
     try:
         with connection.cursor() as cursor:
-            sql = "SELECT `password` FROM `users` WHERE `username`=%s"
+            sql = "SELECT * FROM `users` WHERE `username`=%s"
             cursor.execute(sql, (username))
             result = cursor.fetchone()
     except Exception as e:
@@ -68,7 +68,7 @@ def create_user(username, password, is_manager=0):
 
 
 bcrypt = Bcrypt(app)
-# hashed_pw = bcrypt.generate_password_hash('testing').decode('utf-8')
+hashed_pw = bcrypt.generate_password_hash('testing').decode('utf-8')
 # bcrypt.check_password_hash(hashed_pw, 'password') # returns False
 # bcrypt.check_password_hash(hashed_pw, 'testing') # returns True
 site_title = "| FetchMe Points Program"
@@ -81,15 +81,18 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         if get_user(form.username.data) != None:
-            hashed_pw = get_user(form.username.data)['password']
+            user = get_user(form.username.data)
+            hashed_pw = user['password']
             if get_user(form.username.data) != False and check_password(form.password.data, hashed_pw) == True:
                 flash(f"You have been logged in! {form.username.data}", category="success")
                 session['logged_in'] = True
+                session['username'] = user['username']
+                session['is_manager'] = user['is_manager']
                 return redirect(url_for('dashboard'))
             else:
-                flash("Your username and password did not match!", category='danger')
+                flash("Invalid ID or password. Please try again.", category='danger')
         else:
-            flash("Your username and password did not match!", category='danger')
+            flash("Invalid ID or password. Please try again.", category='danger')
     return render_template('login.html', name="Login Page {0}".format(site_title), form=form)
 
 @app.route('/dashboard')
@@ -98,12 +101,20 @@ def dashboard():
         flash("You must be logged in to view that page.", category='danger')
         return redirect('/login')
     else:
-        return render_template('dashboard.html', name="Dashboard {0}".format(site_title))
+        if ord(session['is_manager']) == 1:
+            return render_template('dashboard_admin.html', name="Dashboard {0}".format(site_title), data_1=0, data_2=2, data_3=3)
+        else:
+            return render_template('dashboard_user.html', name="Dashboard {0}".format(site_title))
+
 
 @app.route("/logout")
 def logout():
     session['logged_in'] = False
     return redirect('/login')
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html', name="Error 404 {0}".format(site_title)), 404
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

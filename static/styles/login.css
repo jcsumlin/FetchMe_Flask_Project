@@ -48,3 +48,8 @@ input[type=text], input[type=password] {
 .title {
     margin-bottom: 50px;
 }
+
+.alert {
+    font-size: 14px;
+    margin-bottom: 0rem;
+}
