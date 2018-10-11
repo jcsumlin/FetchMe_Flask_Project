@@ -1,20 +1,19 @@
-from flask import Flask, render_template, flash, redirect, url_for
+import configparser
+
+import pymysql.cursors
+from flask import Flask, render_template, flash, redirect, url_for, session
 from flask_bcrypt import Bcrypt
 
 from forms import LoginForm
-import pymysql.cursors
-import configparser
+
 config = configparser.ConfigParser()
 config.read('auth.ini')
-
+# TODO: Users stored in the database are logged in and session information is stored
+# TODO: Management vs Employee Views
 # from flaskblog.forms import RegistrationForm, LoginForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '01a856662e56d9b7eef86549cbfd6bf9c9b2aaf4625e9518'
-
-
-
-
 
 def get_user(username):
     connection = pymysql.connect(host='fetchme.cg1iufnmopx8.us-west-2.rds.amazonaws.com',
@@ -81,17 +80,30 @@ def hello_world():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        hashed_pw = get_user(form.username.data)['password']
-        if get_user(form.username.data) != False and check_password(form.password.data, hashed_pw) == True:
-            flash(f"You have been logged in! {form.username.data}", category="success")
-            return redirect(url_for('dashboard'))
+        if get_user(form.username.data) != None:
+            hashed_pw = get_user(form.username.data)['password']
+            if get_user(form.username.data) != False and check_password(form.password.data, hashed_pw) == True:
+                flash(f"You have been logged in! {form.username.data}", category="success")
+                session['logged_in'] = True
+                return redirect(url_for('dashboard'))
+            else:
+                flash("Your username and password did not match!", category='danger')
         else:
             flash("Your username and password did not match!", category='danger')
     return render_template('login.html', name="Login Page {0}".format(site_title), form=form)
 
 @app.route('/dashboard')
 def dashboard():
-    return "You're in!"
+    if not session.get('logged_in'):
+        flash("You must be logged in to view that page.", category='danger')
+        return redirect('/login')
+    else:
+        return render_template('dashboard.html', name="Dashboard {0}".format(site_title))
+
+@app.route("/logout")
+def logout():
+    session['logged_in'] = False
+    return redirect('/login')
 
 if __name__ == '__main__':
     app.run(debug=True)
