@@ -72,9 +72,12 @@ hashed_pw = bcrypt.generate_password_hash('testing').decode('utf-8')
 # bcrypt.check_password_hash(hashed_pw, 'password') # returns False
 # bcrypt.check_password_hash(hashed_pw, 'testing') # returns True
 site_title = "| FetchMe Points Program"
+
+
 @app.route('/', methods=['GET', 'POST'])
 def hello_world():
     return login()
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -95,16 +98,23 @@ def login():
             flash("Invalid ID or password. Please try again.", category='danger')
     return render_template('login.html', name="Login Page {0}".format(site_title), form=form)
 
+
 @app.route('/dashboard')
 def dashboard():
     if not session.get('logged_in'):
-        flash("You must be logged in to view that page.", category='danger')
+        flash("You must be logged in to view that page.",
+              category='danger')
         return redirect('/login')
     else:
         if ord(session['is_manager']) == 1:
-            return render_template('dashboard_admin.html', name="Dashboard {0}".format(site_title), data_1=0, data_2=2, data_3=3)
+            return render_template('dashboard_admin.html',
+                                   name="Dashboard {0}".format(site_title),
+                                   data_1=0,
+                                   data_2=2,
+                                   data_3=3)
         else:
-            return render_template('dashboard_user.html', name="Dashboard {0}".format(site_title))
+            return render_template('dashboard_user.html',
+                                   name="Dashboard {0}".format(site_title))
 
 
 @app.route("/logout")
@@ -112,9 +122,11 @@ def logout():
     session['logged_in'] = False
     return redirect('/login')
 
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html', name="Error 404 {0}".format(site_title)), 404
+
 
 if __name__ == '__main__':
     app.run()
