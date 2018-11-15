@@ -1,59 +1,149 @@
-{% extends "layout.html"  %}
-{% block content %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/dashboard.css') }}">
-    <div class="row">
-        <div class="col-xs-3 sidenav">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+        .row.content {
+            height: 550px
+        }
+
+        /* Set gray background color and 100% height */
+        .sidenav {
+            background-color: #f1f1f1;
+            height: 100%;
+        }
+
+        div.well {
+            text-align: center
+        }
+        /* On small screens, set height to 'auto' for the grid */
+        @media screen and (max-width: 767px) {
+            .row.content {
+                height: auto;
+            }
+        }
+    </style>
+
+</head>
+<body>
+
+<nav class="navbar navbar-inverse visible-xs">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse"
+                    data-target="#myNavbar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
             <img src="https://www.fetchmedelivery.com/editable/templates/default/images/logo.png"
-            style="width:230px;" class="logo">
-            <br>
-            <a href="#"><i class="fa fa-home"></i>Dashboard</a>
-            <a href="#"><i class="fa fa-home"></i>Dashboard</a>
-            <a href="#"><i class="fa fa-home"></i>Dashboard</a>
-            <a href="#"><i class="fa fa-home"></i>Dashboard</a>
-
+                 style="width: 100%; padding-top: 25px; padding-left: 20%; padding-right: 20%; padding-bottom: 25px">
         </div>
-        <div class="col-xs-9">
-            <h1>Dashboard</h1>
-            <a href="/logout">
-                <button class="button button-danger">Logout</button>
-            </a>
-            <br>
-            <div class="col-xs-1"></div>
-            <div class="col-xs-10">
-                <div class="block">
-                    <h1>
-                        {% if data_1 %}
-                            {{ data_1 }}
-                        {% else %}
-                            Error
-                        {% endif %}
-
-                    </h1>
-                </div>
-                <div class="block">
-                    <h1>
-                        {% if data_2 %}
-                            {{ data_2 }}
-                        {% else %}
-                            Error
-                        {% endif %}
-
-                    </h1>
-                </div>
-                <div class="block">
-                    <h1>
-                        {% if data_3 %}
-                            {{ data_3 }}
-                        {% else %}
-                            Error
-                        {% endif %}
-                    </h1>
-                <h3>Points Pending</h3>
-                </div>
-            </div>
-            <div class="col-xs-1"></div>
-
+        <div class="collapse navbar-collapse" id="myNavbar">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="/dashboard">Dashboard</a></li>
+                <li><a href="#">Submit Activities</a></li>
+                <li><a href="#">Bonuses</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
         </div>
     </div>
+</nav>
 
-{% endblock %}
+<div class="container-fluid">
+    <div class="row content">
+        <div class="col-sm-3 sidenav hidden-xs">
+            <img src="https://www.fetchmedelivery.com/editable/templates/default/images/logo.png"
+                 style="width: 100%; padding-top: 25px; padding-left: 20%; padding-right: 20%; padding-bottom: 25px">
+            <ul class="nav nav-pills nav-stacked">
+                <li class="active"><a href="/dashboard">Dashboard</a></li>
+                <li><a href="#">Submit Activities</a></li>
+                <li><a href="#">Bonuses</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+            <br>
+        </div>
+        <br>
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <div class="col-sm-9">
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="well">
+                        <h4>{{ data_1 }}</h4>
+                        <p>Points Approved</p>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="well">
+                        <h4>{{ data_2 }}</h4>
+                        <p>Points Pending <br> Approval</p>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="well">
+                        <h4>{{ data_3 }}</h4>
+                        <p>Points Declined</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div style="padding-left: 15px; padding-right: 15px">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Employee Name</th>
+                            <th>Activity</th>
+                            <th>Approve</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% if points %}
+                            {% for point in points %}
+                                <tr>
+                                    <td>{{ points.full_name }}</td>
+                                    <td>{{ points.task_name }}</td>
+                                    <td>{{ points.approved }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <th>Hooray! All Points handled.</th>
+                            </tr>
+                        {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="well">
+                        <p>Text</p>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="well">
+                        <p>Text</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
