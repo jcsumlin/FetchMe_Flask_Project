@@ -55,3 +55,14 @@
     margin-bottom: 5px;
     position: relative;
 }
+
+.dashboard-table {
+    margin-top: 50px;
+    margin-left: 25px;
+    float: none;
+}
+
+.main-content{
+    width: 100%;
+    background-color: #5a6268;
+}

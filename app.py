@@ -35,6 +35,25 @@ def get_user(username):
         connection.close()
     return result
 
+def getPoints(id: int):
+    connection = pymysql.connect(host='fetchme.cg1iufnmopx8.us-west-2.rds.amazonaws.com',
+                                 port=3306,
+                                 user=config.get('auth', 'mysql_user'),
+                                 password=config.get('auth', 'mysql_password'),
+                                 db='fetchme',
+                                 charset='utf8mb4',
+                                 cursorclass=pymysql.cursors.DictCursor)
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT users.full_name, tasks.task_name, user_points.approved FROM fetchme.users, fetchme.tasks, fetchme.user_points WHERE (user_points.user_id={id} AND users.id={id} AND user_points.approved=2)".format(id=id)
+            cursor.execute(sql, (id))
+            result = cursor.fetchone()
+    except Exception as e:
+        print(e)
+        return False
+    finally:
+        connection.close()
+    return result
 
 def check_password(password, hash):
     if bcrypt.check_password_hash(hash, password):
@@ -83,11 +102,14 @@ def login():
         if get_user(form.username.data) != None:
             user = get_user(form.username.data)
             hashed_pw = user['password']
-            if get_user(form.username.data) != False and check_password(form.password.data, hashed_pw) == True:
+            if get_user(form.username.data) != False \
+                    and check_password(form.password.data, hashed_pw) == True:
                 flash(f"You have been logged in! {form.username.data}", category="success")
                 session['logged_in'] = True
+                session['user_id'] = user['id']
                 session['username'] = user['username']
                 session['is_manager'] = user['is_manager']
+                session['point_balance'] = user['point_balance']
                 return redirect(url_for('dashboard'))
             else:
                 flash("Invalid ID or password. Please try again.", category='danger')
@@ -102,15 +124,57 @@ def dashboard():
         return redirect('/login')
     else:
         if ord(session['is_manager']) == 1:
-            return render_template('dashboard_admin.html', name="Dashboard {0}".format(site_title), data_1=0, data_2=2, data_3=3)
+            if 'points_approved' in session:
+                data_1 = session['points_approved']
+            else:
+                data_1 = "Error"
+            if 'points_pending' in session:
+                data_2 = session['points_pending']
+            else:
+                data_2 = "Error"
+            if 'points_approved' in session:
+                data_3= session['points_approved']
+            else:
+                data_3 = "Error"
+            return render_template('dashboard_admin.html',
+                                   name="Dashboard {0}".format(site_title),
+                                   data_1=data_1,
+                                   data_2=data_2,
+                                   data_3=data_3,
+                                   points=getPoints(session['user_id']))
         else:
             return render_template('dashboard_user.html', name="Dashboard {0}".format(site_title))
 
+
+@app.route("/reports")
+def report_page():
+    if session['is_manager'] is False:
+        flash("Error 403: Forbidden", category="danger")
+        return redirect('/dashboard')
+    else:
+        return render_template("reports.html")
+
+
+@app.route("/task-details")
+def task_review(task):
+    if session['is_manager'] is True:
+        return render_template('task_review_manager.html', task=task)
+    else:
+        return render_template('task_review_driver.html', task=task)
+
+@app.route("/account")
+def account():
+    return render_template('account.html', account=get_current_user())
+
+@app.route("/bonus")
+def bonus():
+    return render_template("bonus_table.html")
 
 @app.route("/logout")
 def logout():
     session['logged_in'] = False
     return redirect('/login')
+
 
 @app.errorhandler(404)
 def page_not_found(e):
