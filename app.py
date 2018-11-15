@@ -35,6 +35,29 @@ def get_user(username):
         connection.close()
     return result
 
+def get_employees():
+    connection = pymysql.connect(host='fetchme.cg1iufnmopx8.us-west-2.rds.amazonaws.com',
+                                 port=3306,
+                                 user=config.get('auth', 'mysql_user'),
+                                 password=config.get('auth', 'mysql_password'),
+                                 db='fetchme',
+                                 charset='utf8mb4',
+                                 cursorclass=pymysql.cursors.DictCursor)
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM `users`"
+            cursor.execute(sql)
+            result = cursor.fetchone()
+        except Exception as e:
+            print(e)
+            return False
+        finally:
+            connection.close()
+        return result
+
+def get_tasks():
+    pass
+
 def getPoints(id: int):
     connection = pymysql.connect(host='fetchme.cg1iufnmopx8.us-west-2.rds.amazonaws.com',
                                  port=3306,
@@ -181,6 +204,17 @@ def logout():
     session['logged_in'] = False
     return redirect('/login')
 
+@app.route("/submit-points")
+def submit_points():
+    return render_template("submit_points.html", tasks = get_tasks())
+
+@app.route("/employee-management")
+def employee_management():
+    return render_template("employee_management.html", employees = get_employees())
+
+@app.route("/task-management")
+def task_management():
+    return render_template("task_management.html", tasks = get_tasks())
 
 @app.errorhandler(404)
 def page_not_found(e):
