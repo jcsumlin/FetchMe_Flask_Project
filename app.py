@@ -89,8 +89,13 @@ def get_employees():
     return users
 
 def get_tasks():
-    pass
+    tasks = Tasks.query.all()
+    return tasks
 
+
+"""
+Get specific users points
+"""
 def getPoints(id: int):
     pass
 
@@ -101,9 +106,15 @@ def check_password(password, hash):
         return False
 
 
-def create_user(username, password, fullname,driver_rating=0.0, avg_delivery_time=30.0, is_manager=False):
+def create_user(username: str,
+                password: str,
+                fullname: str,
+                driver_rating=0.000,
+                avg_delivery_time=0.00,
+                is_manager=False):
+    hashed_pw = bcrypt.generate_password_hash(password).decode('utf-8')
     new_user = User(email=username,
-                    password=password,
+                    password=hashed_pw,
                     is_manager=is_manager,
                     full_name=fullname,
                     driver_rating=driver_rating,
@@ -116,8 +127,13 @@ def create_user(username, password, fullname,driver_rating=0.0, avg_delivery_tim
     except Exception as e:
         return [False, e]
 
+"""
+Return user information for the logged in user for the accounts page
+"""
+def get_current_user(id: int):
+    user = User.query.filter(id=id).first()
+    return user
 
-bcrypt = Bcrypt(app)
 hashed_pw = bcrypt.generate_password_hash('testing').decode('utf-8')
 # bcrypt.check_password_hash(hashed_pw, 'password') # returns False
 # bcrypt.check_password_hash(hashed_pw, 'testing') # returns True
@@ -199,6 +215,7 @@ def task_review(task):
     else:
         return render_template('task_review_driver.html', task=task)
 
+
 @app.route("/account")
 def account():
     return render_template('account.html', account=get_current_user())
@@ -209,7 +226,7 @@ def bonus():
 
 @app.route("/logout")
 def logout():
-    session['logged_in'] = False
+    session.pop('logged_in', None)
     return redirect('/login')
 
 @app.route("/submit-points")
