@@ -1,8 +1,8 @@
 import configparser
 
-import pymysql.cursors
 from flask import Flask, render_template, flash, redirect, url_for, session
 from flask_bcrypt import Bcrypt
+from flask_sqlalchemy import SQLAlchemy
 
 from forms import LoginForm
 
@@ -14,69 +14,85 @@ config.read('auth.ini')
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '01a856662e56d9b7eef86549cbfd6bf9c9b2aaf4625e9518'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
 
-def get_user(username):
-    connection = pymysql.connect(host='fetchme.cg1iufnmopx8.us-west-2.rds.amazonaws.com',
-                                 port=3306,
-                                 user=config.get('auth', 'mysql_user'),
-                                 password=config.get('auth', 'mysql_password'),
-                                 db='fetchme',
-                                 charset='utf8mb4',
-                                 cursorclass=pymysql.cursors.DictCursor)
-    try:
-        with connection.cursor() as cursor:
-            sql = "SELECT * FROM `users` WHERE `username`=%s"
-            cursor.execute(sql, (username))
-            result = cursor.fetchone()
-    except Exception as e:
-        print(e)
+class User(db.Model):
+    __tablename__ = 'user'
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+    full_name = db.Column(db.String(255), nullable=False)
+    is_manager = db.Column(db.Boolean, nullable=False, default=False)
+    point_bal = db.Column(db.Integer, nullable=False, default=0)
+    driver_rating = db.Column(db.Float(4), nullable=False, default=0.000)
+    avg_delivery_time = db.Column(db.Float(3), nullable=False, default=0.00)
+    tasks = db.relationship('CompletedTasks', lazy=True)
+
+    def __repr__(self):
+        return f"User('{self.id}', '{self.email}', '{self.full_name}', '{self.is_manager}', '{self.point_bal}')"
+
+class Tasks(db.Model):
+    __tablename__ = 'tasks'
+    task_id = db.Column(db.Integer, primary_key=True, nullable=False)
+    task_name = db.Column(db.String(255), nullable=False)
+    task_desc = db.Column(db.Text, nullable=False)
+    task_point_value = db.Column(db.Integer, nullable=False, default=0)
+
+    def __repr__(self):
+        return(f"Tasks('{self.task_id}', '{self.task_name}'), '{self.task_point_value}'")
+
+class CompletedTasks(db.Model):
+    __tablename__ = 'completedtasks'
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    task_id = db.Column(db.Integer, db.ForeignKey('tasks.task_id'), nullable=False)
+    is_approved = db.Column(db.Boolean, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    def __repr__(self):
+        return(f"CompletedTasks('{self.task_id}', '{self.is_approved}')")
+
+class Bonus(db.Model):
+    __tablename__ = 'bonus'
+    bonus_id = db.Column(db.Integer, nullable=False, primary_key=True)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
+    bonus_name = db.Column(db.String(255), nullable=False)
+    bonus_desc = db.Column(db.Text, nullable=False)
+    balance_req = db.Column(db.Integer, nullable=False)
+
+    def __repr__(self):
+        return(f"Bonus('{self.bonus_name}', '{self.is_active}', '{self.balance_req}')")
+
+
+user = {
+    'email': 'jcsumlin@gmail.com',
+    'password': 'test',
+    'full_name': 'Chat Sumlin',
+    'is_mananger': True,
+    'point_bal': 10,
+    'driver_rating': 4.99,
+    'avg_delivery_time': 35.1,
+}
+
+def get_user(username: str):
+    user = User.query.filter(username=username).all()
+    if len(user) == 0:
         return False
-    finally:
-        connection.close()
-    return result
+    elif len(user) == 1:
+        return user[0]
+    elif len(user) > 1:
+        raise ValueError("Database returned more than one user, this should not be possible")
 
 def get_employees():
-    connection = pymysql.connect(host='fetchme.cg1iufnmopx8.us-west-2.rds.amazonaws.com',
-                                 port=3306,
-                                 user=config.get('auth', 'mysql_user'),
-                                 password=config.get('auth', 'mysql_password'),
-                                 db='fetchme',
-                                 charset='utf8mb4',
-                                 cursorclass=pymysql.cursors.DictCursor)
-    try:
-        with connection.cursor() as cursor:
-            sql = "SELECT * FROM `users`"
-            cursor.execute(sql)
-            result = cursor.fetchone()
-        except Exception as e:
-            print(e)
-            return False
-        finally:
-            connection.close()
-        return result
+    users = User.query.filter(is_manager=False).all()
+    return users
 
 def get_tasks():
     pass
 
 def getPoints(id: int):
-    connection = pymysql.connect(host='fetchme.cg1iufnmopx8.us-west-2.rds.amazonaws.com',
-                                 port=3306,
-                                 user=config.get('auth', 'mysql_user'),
-                                 password=config.get('auth', 'mysql_password'),
-                                 db='fetchme',
-                                 charset='utf8mb4',
-                                 cursorclass=pymysql.cursors.DictCursor)
-    try:
-        with connection.cursor() as cursor:
-            sql = "SELECT users.full_name, tasks.task_name, user_points.approved FROM fetchme.users, fetchme.tasks, fetchme.user_points WHERE (user_points.user_id={id} AND users.id={id} AND user_points.approved=2)".format(id=id)
-            cursor.execute(sql, (id))
-            result = cursor.fetchone()
-    except Exception as e:
-        print(e)
-        return False
-    finally:
-        connection.close()
-    return result
+    pass
 
 def check_password(password, hash):
     if bcrypt.check_password_hash(hash, password):
@@ -85,28 +101,20 @@ def check_password(password, hash):
         return False
 
 
-def create_user(username, password, is_manager=0):
-    connection = pymysql.connect(host='fetchme.cg1iufnmopx8.us-west-2.rds.amazonaws.com',
-                                 port=3306,
-                                 user=config.get('auth', 'mysql_user'),
-                                 password=config.get('auth', 'mysql_password'),
-                                 db='fetchme',
-                                 charset='utf8mb4',
-                                 cursorclass=pymysql.cursors.DictCursor)
+def create_user(username, password, fullname,driver_rating=0.0, avg_delivery_time=30.0, is_manager=False):
+    new_user = User(email=username,
+                    password=password,
+                    is_manager=is_manager,
+                    full_name=fullname,
+                    driver_rating=driver_rating,
+                    avg_delivery_time=avg_delivery_time)
+
     try:
-        with connection.cursor() as cursor:
-            sql = "INSERT INTO `users` (`username`, `password`, `is_manager`) VALUES (%s, %s, %s)"
-            password = bcrypt.generate_password_hash(password).decode('utf-8')
-            cursor.execute(sql, (username, password, is_manager))
-
-        connection.commit()
+        db.session.add(new_user)
+        db.session.commit()
+        return True
     except Exception as e:
-        print(e)
-        return False
-
-    finally:
-        connection.close()
-    return "user %s has been created" % username
+        return [False, e]
 
 
 bcrypt = Bcrypt(app)
