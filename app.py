@@ -75,22 +75,29 @@ user = {
     'avg_delivery_time': 35.1,
 }
 
-def get_user(username: str):
-    user = User.query.filter(username=username).all()
-    if len(user) == 0:
-        return False
-    elif len(user) == 1:
-        return user[0]
-    elif len(user) > 1:
-        raise ValueError("Database returned more than one user, this should not be possible")
+
+def get_user(email: str):
+    user = User.query.filter_by(email=email).all()
+    if len(user) is 0:
+        flash("Invalid username or password.", category='danger')
+        redirect(url_for('login'))
+    elif len(user) is 1:
+        return user
+
 
 def get_employees():
     users = User.query.filter(is_manager=False).all()
     return users
 
-def get_tasks():
-    pass
 
+def get_tasks():
+    tasks = Tasks.query.all()
+    return tasks
+
+
+"""
+Get specific users points
+"""
 def getPoints(id: int):
     pass
 
@@ -101,9 +108,15 @@ def check_password(password, hash):
         return False
 
 
-def create_user(username, password, fullname,driver_rating=0.0, avg_delivery_time=30.0, is_manager=False):
+def create_user(username: str,
+                password: str,
+                fullname: str,
+                driver_rating=0.000,
+                avg_delivery_time=0.00,
+                is_manager=False):
+    hashed_pw = bcrypt.generate_password_hash(password).decode('utf-8')
     new_user = User(email=username,
-                    password=password,
+                    password=hashed_pw,
                     is_manager=is_manager,
                     full_name=fullname,
                     driver_rating=driver_rating,
@@ -116,8 +129,13 @@ def create_user(username, password, fullname,driver_rating=0.0, avg_delivery_tim
     except Exception as e:
         return [False, e]
 
+"""
+Return user information for the logged in user for the accounts page
+"""
+def get_current_user(id: int):
+    user = User.query.filter(id=id).first()
+    return user
 
-bcrypt = Bcrypt(app)
 hashed_pw = bcrypt.generate_password_hash('testing').decode('utf-8')
 # bcrypt.check_password_hash(hashed_pw, 'password') # returns False
 # bcrypt.check_password_hash(hashed_pw, 'testing') # returns True
@@ -131,22 +149,23 @@ def hello_world():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    session.pop('logged_in', None)
     form = LoginForm()
     if form.validate_on_submit():
-        if get_user(form.username.data) != None:
-            user = get_user(form.username.data)
-            hashed_pw = user['password']
-            if get_user(form.username.data) != False \
-                    and check_password(form.password.data, hashed_pw) == True:
-                flash(f"You have been logged in! {form.username.data}", category="success")
-                session['logged_in'] = True
-                session['user_id'] = user['id']
-                session['username'] = user['username']
-                session['is_manager'] = user['is_manager']
-                session['point_balance'] = user['point_balance']
-                return redirect(url_for('dashboard'))
-            else:
-                flash("Invalid ID or password. Please try again.", category='danger')
+        user = get_user(form.username.data)
+        hashed_pw = user[0].password
+
+        if get_user(form.username.data) != False \
+                and check_password(form.password.data, hashed_pw) == True:
+            user = user[0]
+            session['user'] = {}
+            session['user']['logged_in'] = True
+            session['user']['user_id'] = user.id
+            session['user']['email'] = user.email
+            session['user']['is_manager'] = user.is_manager
+            session['user']['point_balance'] = user.point_bal
+            flash(f"You have been logged in! {session['user']['email']}", category="success")
+            return redirect(url_for('dashboard'))
         else:
             flash("Invalid ID or password. Please try again.", category='danger')
     return render_template('login.html', name="Login Page {0}".format(site_title), form=form)
@@ -154,22 +173,22 @@ def login():
 
 @app.route('/dashboard')
 def dashboard():
-    if not session.get('logged_in'):
+    if not session['user'].get('logged_in'):
         flash("You must be logged in to view that page.",
               category='danger')
         return redirect('/login')
     else:
-        if ord(session['is_manager']) == 1:
-            if 'points_approved' in session:
-                data_1 = session['points_approved']
+        if (session['user']['is_manager']) is True:
+            if 'points_approved' in session['user']:
+                data_1 = session['user']['points_approved']
             else:
                 data_1 = "Error"
-            if 'points_pending' in session:
-                data_2 = session['points_pending']
+            if 'points_pending' in session['user']:
+                data_2 = session['user']['points_pending']
             else:
                 data_2 = "Error"
-            if 'points_approved' in session:
-                data_3= session['points_approved']
+            if 'points_approved' in session['user']:
+                data_3= session['user']['points_approved']
             else:
                 data_3 = "Error"
             return render_template('dashboard_admin.html',
@@ -199,6 +218,7 @@ def task_review(task):
     else:
         return render_template('task_review_driver.html', task=task)
 
+
 @app.route("/account")
 def account():
     return render_template('account.html', account=get_current_user())
@@ -209,7 +229,7 @@ def bonus():
 
 @app.route("/logout")
 def logout():
-    session['logged_in'] = False
+    session.pop('logged_in', None)
     return redirect('/login')
 
 @app.route("/submit-points")
