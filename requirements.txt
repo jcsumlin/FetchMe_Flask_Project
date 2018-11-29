@@ -1,4 +1,10 @@
 flask
-Flask-Bcrypt=0.7.1
-Flask-WTF=0.14.2
-WTForms=2.2.1
+Flask-Bcrypt==0.7.1
+Flask-WTF==0.14.2
+WTForms==2.2.1
+flask-login
+python-dotenv
+requests
+authlib
+six
+flask-sqlalchemy
