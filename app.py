@@ -79,7 +79,6 @@ user = {
 def get_user(email: str):
     user = User.query.filter_by(email=email).all()
     if len(user) is 0:
-        flash("Invalid username or password.", category='danger')
         redirect(url_for('login'))
     elif len(user) is 1:
         return user
@@ -149,23 +148,29 @@ def hello_world():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    session.pop('logged_in', None)
+    session['user'] = None
     form = LoginForm()
     if form.validate_on_submit():
-        user = get_user(form.username.data)
-        hashed_pw = user[0].password
+        if get_user(form.username.data):
+            user = get_user(form.username.data)
+            hashed_pw = user[0].password
 
-        if get_user(form.username.data) != False \
-                and check_password(form.password.data, hashed_pw) == True:
-            user = user[0]
-            session['user'] = {}
-            session['user']['logged_in'] = True
-            session['user']['user_id'] = user.id
-            session['user']['email'] = user.email
-            session['user']['is_manager'] = user.is_manager
-            session['user']['point_balance'] = user.point_bal
-            flash(f"You have been logged in! {session['user']['email']}", category="success")
-            return redirect(url_for('dashboard'))
+            if get_user(form.username.data) != False \
+                    and check_password(form.password.data, hashed_pw) == True:
+                user = user[0]
+                session['user'] = {}
+                session['user']['logged_in'] = True
+                session['user']['user_id'] = user.id
+                session['user']['email'] = user.email
+                session['user']['is_manager'] = user.is_manager
+                session['user']['point_balance'] = user.point_bal
+                session['user']['full_name'] = user.full_name
+                session['user']['points_approved'] = 1
+                session['user']['points_pending'] = 64
+                session['user']['points_declined'] = 0
+
+                flash(f"You have been logged in! {session['user']['full_name']}", category="success")
+                return redirect(url_for('dashboard'))
         else:
             flash("Invalid ID or password. Please try again.", category='danger')
     return render_template('login.html', name="Login Page {0}".format(site_title), form=form)
@@ -173,7 +178,8 @@ def login():
 
 @app.route('/dashboard')
 def dashboard():
-    if not session['user'].get('logged_in'):
+    # print(session['user']['logged_in'])
+    if session['user'] == None:
         flash("You must be logged in to view that page.",
               category='danger')
         return redirect('/login')
@@ -187,16 +193,16 @@ def dashboard():
                 data_2 = session['user']['points_pending']
             else:
                 data_2 = "Error"
-            if 'points_approved' in session['user']:
-                data_3= session['user']['points_approved']
+            if 'points_declined' in session['user']:
+                data_3= session['user']['points_declined']
             else:
                 data_3 = "Error"
             return render_template('dashboard_admin.html',
                                    name="Dashboard {0}".format(site_title),
-                                   data_1=data_1,
-                                   data_2=data_2,
-                                   data_3=data_3,
-                                   points=getPoints(session['user_id']))
+                                   data_1=str(data_1),
+                                   data_2=str(data_2),
+                                   data_3=str(data_3),
+                                   points=getPoints(session['user']['user_id']))
         else:
             return render_template('dashboard_user.html',
                                    name="Dashboard {0}".format(site_title))
@@ -204,7 +210,7 @@ def dashboard():
 
 @app.route("/reports")
 def report_page():
-    if session['is_manager'] is False:
+    if session['user']['is_manager'] is False:
         flash("Error 403: Forbidden", category="danger")
         return redirect('/dashboard')
     else:
@@ -213,7 +219,7 @@ def report_page():
 
 @app.route("/task-details")
 def task_review(task):
-    if session['is_manager'] is True:
+    if session['user']['is_manager'] is True:
         return render_template('task_review_manager.html', task=task)
     else:
         return render_template('task_review_driver.html', task=task)
@@ -229,7 +235,7 @@ def bonus():
 
 @app.route("/logout")
 def logout():
-    session.pop('logged_in', None)
+    session['user'] = None
     return redirect('/login')
 
 @app.route("/submit-points")
