@@ -214,7 +214,7 @@ def report_page():
         flash("Error 403: Forbidden", category="danger")
         return redirect('/dashboard')
     else:
-        return render_template("reports.html")
+        return render_template("report_generation.html")
 
 
 @app.route("/task-details")
@@ -256,4 +256,4 @@ def page_not_found(e):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=80)
