@@ -71,5 +71,5 @@ email: admin@admin.com
 password: testing
 
 # What about the database?
-The database is actually running side by side with the web application. We decided to not use a 3rd party database for better security and ease of use. We have included the site.db file in the gitignore file so that your database will never be pushed to the repository by accident.
+The database is actually running side by side with the web application. We decided to not use a 3rd party database for better security and ease of use. We have included the site.db file in the .gitignore file so that your database will never be pushed to the repository by accident.
 
