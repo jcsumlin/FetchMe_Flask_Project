@@ -1,6 +1,4 @@
-
 *.iml
-*.xml
-*.xml
 *.ini
 *.xml
+site.db
