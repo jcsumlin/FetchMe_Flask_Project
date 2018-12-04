@@ -17,7 +17,7 @@ First, pull the lastest code from the repository to your hosting platform:
 ```sh
 $ git pull https://github.com/jcsumlin/FetchMe_Flask_Project.git
 ```
-The develop branch contains the newest more unstable features of the project and it is reccomended that you stick to the master branch for live versions.
+The develop branch contains the newest more unstable features of the project and it is recomended that you stick to the master branch for live versions.
 
 
 ## Run the application
