@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Bootstrap Example</title>
+    <title>{{ title }}</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet"
@@ -44,14 +44,18 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <img src="https://www.fetchmedelivery.com/editable/templates/default/images/logo.png"
-                 style="width: 100%; padding-top: 25px; padding-left: 20%; padding-right: 20%; padding-bottom: 25px">
+            <a href="/dashboard"><img src="https://www.fetchmedelivery.com/editable/templates/default/images/logo.png"
+                 style="width: 100%; padding-top: 25px; padding-left: 20%; padding-right: 20%; padding-bottom: 25px"></a>
         </div>
         <div class="collapse navbar-collapse" id="myNavbar">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="/dashboard">Dashboard</a></li>
-                <li><a href="#">Submit Activities</a></li>
-                <li><a href="#">Bonuses</a></li>
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="/account">My Account</a></li>
+                <li class="disabled"><a href="/task-details">Task Review</a></li>
+                <li class="disabled"><a href="/task-management">Task Management</a></li>
+                <li class="disabled"><a href="/bonus">Bonus Management</a></li>
+                <li><a href="/employee-management">Employee Management</a></li>
+                <li class="disabled"><a href="/reports">Report Generation</a></li>
                 <li><a href="/logout">Logout</a></li>
             </ul>
         </div>
@@ -64,35 +68,57 @@
             <img src="https://www.fetchmedelivery.com/editable/templates/default/images/logo.png"
                  style="width: 100%; padding-top: 25px; padding-left: 20%; padding-right: 20%; padding-bottom: 25px">
             <ul class="nav nav-pills nav-stacked">
-                <li class="active"><a href="/dashboard">Dashboard</a></li>
-                <li><a href="#">Submit Activities</a></li>
-                <li><a href="#">Bonuses</a></li>
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="/account">My Account</a></li>
+                <li class="disabled"><a href="/task-details">Task Review</a></li>
+                <li class="disabled"><a href="/task-management">Task Management</a></li>
+                <li class="disabled"><a href="/bonus">Bonus Management</a></li>
+                <li><a href="/employee-management">Employee Management</a></li>
+                <li class="disabled"><a href="/reports">Report Generation</a></li>
                 <li><a href="/logout">Logout</a></li>
             </ul>
             <br>
         </div>
         <br>
-        <h1>
-            <center>My Account</center>
-        </h1>
+        <div class="col-md-2"></div>
+        <div class="col-sm-8">
+            <h1>
+                My Account
+            </h1>
 
-        <div class="col-sm-9">
-            <center>Employee Name: <input type="text" name="firstname" value="Chat Sumlin"></center>
-            <center>Employee / Account ID: <input type="text" name="firstname" value="0000">
-            </center>
-            <center>Employee Rating: <input type="text" name="firstname" value="5.0"></center>
-            <center>Average Delivery Time: <input type="text" name="firstname" value="34 Minutes">
-            </center>
-
-
-            <div class="row">
-                <div class="col-sm-3">
-                    <div class="well">
-                        <p>Save</p>
+            <form>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="account-fullnamme">Employee Name: </label>
+                            <input id="account-fullnamme" type="text" name="fullname"
+                                   value="Chat Sumlin">
+                        </div>
+                        <div class="form-group">
+                            <label for="account-id">Employee / Account ID: </label>
+                            <input id="account-id" type="text" name="user ID" value="{{ user.id }}"
+                                   disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="account-rating">Employee Rating: </label>
+                            <input id="account-rating" type="text" name="driver rating"
+                                   value="{{ user.point_bal }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="account-delivery-time">Average Delivery Time: </label>
+                            <input id="account-delivery-time" type="text" name="avg delivery time"
+                                   value=" {{ user.avg_delivery_time }} Minutes">
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <button type="submit" class="btn btn-success" disabled>Save</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
+        <div class="col-md-2"></div>
     </div>
 </div>
 
