@@ -31,7 +31,7 @@ class User(db.Model):
     tasks = db.relationship('CompletedTasks', lazy=True)
 
     def __repr__(self):
-        return f"User('{self.id}', '{self.email}', '{self.full_name}', '{self.is_manager}', '{self.point_bal}')"
+        return f"User('{self.id}', '{self.email}', '{self.full_name}', '{self.is_manager}', '{self.point_bal}', '{self.avg_delivery_time}')"
 
 class Tasks(db.Model):
     __tablename__ = 'tasks'
@@ -85,7 +85,7 @@ def get_user(email: str):
 
 
 def get_employees():
-    users = User.query.filter(is_manager=False).all()
+    users = User.query.filter_by(is_manager=True).all()
     return users
 
 
@@ -132,7 +132,7 @@ def create_user(username: str,
 Return user information for the logged in user for the accounts page
 """
 def get_current_user(id: int):
-    user = User.query.filter(id=id).first()
+    user = User.query.filter_by(id=id).first()
     return user
 
 hashed_pw = bcrypt.generate_password_hash('testing').decode('utf-8')
@@ -227,7 +227,7 @@ def task_review(task):
 
 @app.route("/account")
 def account():
-    return render_template('account.html', account=get_current_user())
+    return render_template('account.html', title="My Account", user=get_current_user(session['user']['user_id']))
 
 @app.route("/bonus")
 def bonus():
@@ -244,7 +244,7 @@ def submit_points():
 
 @app.route("/employee-management")
 def employee_management():
-    return render_template("employee_management.html", employees = get_employees())
+    return render_template("employee_management.html", employees=get_employees())
 
 @app.route("/task-management")
 def task_management():
